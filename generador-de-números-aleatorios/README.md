@@ -2,7 +2,8 @@
 
 This contains everything you need to run your app locally.
 
-## URL de la app
+## Creo una app en Google AI Studio y la cargo en este repo
+Y la URL es https://patzaro.github.io/luz-eter/generador-de-números-aleatorios
 
 
 
