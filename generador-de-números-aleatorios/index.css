@@ -1,0 +1,90 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+:root {
+  --primary-color: #007bff;
+  --primary-hover-color: #0056b3;
+  --text-color: #333;
+  --bg-color: #f4f7f6;
+  --container-bg: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.container {
+  padding: 2rem 4rem;
+  background-color: var(--container-bg);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+#number-display {
+  font-family: 'Roboto', sans-serif;
+  font-size: 8rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 160px; /* Ensure space for 2 digits */
+  color: var(--text-color);
+}
+
+#generate-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  user-select: none; /* Prevent text selection on click */
+}
+
+#generate-btn:hover {
+  background-color: var(--primary-hover-color);
+}
+
+#generate-btn:active {
+  transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .container {
+    padding: 1.5rem;
+  }
+  #number-display {
+    font-size: 6rem;
+  }
+  #generate-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+}
