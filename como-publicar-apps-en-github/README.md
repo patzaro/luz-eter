@@ -6,7 +6,7 @@
 
 Esta es una aplicación web interactiva de una sola página, diseñada como una guía paso a paso para ayudar a los desarrolladores a subir sus proyectos a GitHub. La guía cubre desde la preparación inicial del proyecto hasta la publicación en GitHub Pages y las actualizaciones posteriores.
 
-**[➡️ Ver la guía en vivo](https://[TU-USUARIO].github.io/[NOMBRE-DEL-REPOSITORIO]/)** (¡reemplaza el enlace con tu URL de GitHub Pages!)
+**[➡️ Ver la guía en vivo](https://patzaro.github.io/luz-eter/como-publicar-apps-en-github/)**
 
 ## ✨ Características Principales
 
