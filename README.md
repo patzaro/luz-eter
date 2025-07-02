@@ -1,5 +1,4 @@
-# luz-eter
-primer repositorio
+Este es el primer repositorio que creé en GitHUb.
 
 ## Propósito de este repositorio
 Es mi primer repositorio de prueba. Lo usaré para publicar las apps que creo con IA, haciendo Vibe Coding.
