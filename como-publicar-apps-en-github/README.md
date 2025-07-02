@@ -55,6 +55,27 @@ Este proyecto es una aplicación autocontenida. Sin embargo, si planeas tener un
     ├── 📄 style.css
     └── 📄 script.js
 ```
+### Ejemplo de Estructura Recomendada por Claude:
+```
+📁 mis-apps-ia/
+├── 📄 README.md (página principal)
+├── 📄 index.html (landing page opcional)
+├── 📄 .gitignore
+├── 📁 calculadora-ia/
+│   ├── 📄 index.html
+│   ├── 📄 README.md
+│   ├── 📄 style.css
+│   └── 📄 script.js
+├── 📁 generador-textos/
+│   ├── 📄 index.html
+│   └── 📄 README.md
+├── 📁 juego-trivia/
+│   ├── 📄 index.html
+│   └── 📄 README.md
+└── 📁 assets/
+    ├── 📄 logo.png
+    └── 📄 favicon.ico
+```
 
 Al seguir esta estructura, cada proyecto se mantiene independiente, pero todos están centralizados en un único repositorio fácil de gestionar y compartir.
 
