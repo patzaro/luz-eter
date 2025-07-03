@@ -10,4 +10,4 @@ Los archivos Léame son un buen lugar para describir el proyecto con más detall
 ## Lista de apps
 - Creé un generador de números en Google AI Studio y la URL es https://patzaro.github.io/luz-eter/generador-de-números-aleatorios .
 - Con Claude Sonnet 4 creé una guía para publicar apps en GitHub. https://patzaro.github.io/luz-eter/como-publicar-apps-en-github
-- La app https://patzaro.github.io/luz-eter/equilibrio-simetrico-y-asimetrico es una buena app, con teoría y ejercicios, que currándola un poco puede quedar bien para 3.º de ESO.
+- La app https://patzaro.github.io/luz-eter/equilibrio-simetrico-y-asimetrico es una buena app, con teoría y ejercicios, que currándola un poco puede quedar bien para 3.º de ESO. Creada con Claude Sonnet 4 en https://claude.ai/chat/65d2fb46-3293-4feb-a38c-9e7995f7c925
