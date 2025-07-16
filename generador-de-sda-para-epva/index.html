@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Situaciones de Aprendizaje EPVA - Galicia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .step-indicator {
+            transition: all 0.3s ease-in-out;
+        }
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-5xl">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Generador de Situaciones de Aprendizaje de EPVA</h1>
+            <p class="text-gray-600 mt-2">Crea experiencias educativas de Educación Plástica, Visual e Audiovisual adaptadas a tu alumnado en Galicia.</p>
+        </header>
+
+        <!-- Indicador de Pasos (sin cambios) -->
+        <div class="w-full mb-8">
+            <div class="flex justify-between items-center">
+                <div class="step-indicator flex-1 text-center">
+                    <div id="step-1-dot" class="mx-auto w-8 h-8 rounded-full border-2 flex items-center justify-center bg-blue-600 border-blue-600 text-white">1</div>
+                    <p id="step-1-text" class="mt-2 text-sm font-semibold text-blue-600">Información</p>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300"></div>
+                <div class="step-indicator flex-1 text-center">
+                    <div id="step-2-dot" class="mx-auto w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-300 border-gray-400 text-gray-500">2</div>
+                    <p id="step-2-text" class="mt-2 text-sm font-medium text-gray-500">Narrativas</p>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300"></div>
+                <div class="step-indicator flex-1 text-center">
+                    <div id="step-3-dot" class="mx-auto w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-300 border-gray-400 text-gray-500">3</div>
+                    <p id="step-3-text" class="mt-2 text-sm font-medium text-gray-500">Desarrollo</p>
+                </div>
+                 <div class="flex-1 h-1 bg-gray-300"></div>
+                <div class="step-indicator flex-1 text-center">
+                    <div id="step-4-dot" class="mx-auto w-8 h-8 rounded-full border-2 flex items-center justify-center bg-gray-300 border-gray-400 text-gray-500">4</div>
+                    <p id="step-4-text" class="mt-2 text-sm font-medium text-gray-500">Descarga</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor principal (sin cambios) -->
+        <main class="bg-white p-6 md:p-8 rounded-xl shadow-md">
+            
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                <strong class="font-bold">¡Vaya! Hubo un problema.</strong>
+                <span class="block sm:inline" id="error-text"></span>
+            </div>
+
+            <div id="steps-wrapper">
+                <!-- Paso 1: Formulario de entrada -->
+                <div id="step-1-content">
+                    <h2 class="text-2xl font-bold mb-4">1. Define tu Situación de Aprendizaje</h2>
+                    <p class="mb-6 text-gray-600">Completa los siguientes campos para que pueda generar propuestas a tu medida.</p>
+                    <form id="sa-form" class="space-y-6">
+                        <div>
+                            <label for="topic" class="block text-sm font-medium text-gray-700">Tema o Saber Básico Principal</label>
+                            <input type="text" id="topic" name="topic" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Ej: Elementos del lenguaje visual, La composición, Lenguaje publicitario..." required>
+                        </div>
+                        <div>
+                            <label for="course" class="block text-sm font-medium text-gray-700">Curso</label>
+                            <select id="course" name="course" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="1º ESO">1º ESO</option>
+                                <option value="3º ESO">3º ESO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="context" class="block text-sm font-medium text-gray-700">Contexto del grupo</label>
+                            <textarea id="context" name="context" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Ej: Grupo con interés en los videojuegos, alumnado desmotivado..." required></textarea>
+                        </div>
+                         <div>
+                            <label for="diversity" class="block text-sm font-medium text-gray-700">Atención a la diversidad</label>
+                            <textarea id="diversity" name="diversity" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Ej: Alumnado con TDAH, necesidad de apoyos visuales, actividades manipulativas..." required></textarea>
+                        </div>
+                        <div>
+                            <label for="sessions" class="block text-sm font-medium text-gray-700">Número de sesiones</label>
+                            <input type="number" id="sessions" name="sessions" min="1" max="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Ej: 5" required>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Generar Narrativas
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Pasos 2, 3 y 4 (sin cambios) -->
+                <div id="step-2-content" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">2. Elige una Narrativa</h2>
+                    <p class="mb-6 text-gray-600">He generado 3 posibles hilos conductores para tu Situación de Aprendizaje. Selecciona el que más te guste o pide nuevas propuestas.</p>
+                    <div id="narratives-container" class="grid md:grid-cols-3 gap-6"></div>
+                     <div class="mt-8 flex justify-between">
+                        <button id="back-to-step-1" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Volver</button>
+                        <button id="regenerate-narratives" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Proponer otras</button>
+                    </div>
+                </div>
+                <div id="step-3-content" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">3. Revisa y Aprueba el Desarrollo</h2>
+                    <p class="mb-6 text-gray-600">Aquí está la propuesta completa. Revisa las actividades y su conexión curricular. Si todo es correcto, aprueba para generar el PDF.</p>
+                    <div id="sa-development-container" class="space-y-8"></div>
+                     <div class="mt-8 flex justify-between">
+                        <button id="back-to-step-2" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Elegir otra narrativa</button>
+                        <button id="approve-sa" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">Aprobar y Continuar</button>
+                    </div>
+                </div>
+                <div id="step-4-content" class="hidden">
+                     <h2 class="text-2xl font-bold mb-4">4. ¡Todo listo! Descarga tu PDF</h2>
+                     <p class="mb-6 text-gray-600">Tu Situación de Aprendizaje ha sido generada con éxito. Haz clic en el botón para descargar el documento en formato PDF.</p>
+                     <div class="text-center p-8 bg-green-50 rounded-lg">
+                        <svg class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <p class="mt-4 text-lg font-medium">¡Enhorabuena! Has creado una nueva experiencia de aprendizaje.</p>
+                        <button id="download-pdf" class="mt-6 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            Descargar PDF
+                        </button>
+                     </div>
+                     <div class="mt-8 flex justify-center">
+                        <button id="start-over" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Crear otra Situación de Aprendizaje</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loader" class="hidden flex flex-col items-center justify-center p-8">
+                <div class="loader"></div>
+                <p id="loader-text" class="mt-4 text-gray-600"></p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- ESTADO DE LA APLICACIÓN ---
+        const state = {
+            currentStep: 1,
+            userInput: {},
+            narratives: [],
+            selectedNarrative: null,
+            learningSituation: null,
+            // Objeto para guardar los textos de los currículos cargados
+            curricula: {},
+        };
+
+        // --- ELEMENTOS DEL DOM (sin cambios) ---
+        const stepsWrapper = document.getElementById('steps-wrapper');
+        const stepContents = {
+            1: document.getElementById('step-1-content'),
+            2: document.getElementById('step-2-content'),
+            3: document.getElementById('step-3-content'),
+            4: document.getElementById('step-4-content'),
+        };
+        const stepDots = { 1: document.getElementById('step-1-dot'), 2: document.getElementById('step-2-dot'), 3: document.getElementById('step-3-dot'), 4: document.getElementById('step-4-dot') };
+        const stepTexts = { 1: document.getElementById('step-1-text'), 2: document.getElementById('step-2-text'), 3: document.getElementById('step-3-text'), 4: document.getElementById('step-4-text') };
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loader-text');
+        const saForm = document.getElementById('sa-form');
+        const narrativesContainer = document.getElementById('narratives-container');
+        const saDevelopmentContainer = document.getElementById('sa-development-container');
+        const errorMessageDiv = document.getElementById('error-message');
+        const errorTextSpan = document.getElementById('error-text');
+        
+        // --- LÓGICA DE NAVEGACIÓN Y UI (sin cambios) ---
+        function updateStepIndicator(step) {
+            for (let i = 1; i <= 4; i++) {
+                const dot = stepDots[i];
+                const text = stepTexts[i];
+                dot.classList.remove('bg-blue-600', 'border-blue-600', 'text-white', 'bg-gray-300', 'border-gray-400', 'text-gray-500');
+                text.classList.remove('font-semibold', 'text-blue-600', 'font-medium', 'text-gray-500');
+                if (i < step) { dot.classList.add('bg-blue-600', 'border-blue-600', 'text-white'); text.classList.add('font-medium', 'text-blue-600'); } 
+                else if (i === step) { dot.classList.add('bg-blue-600', 'border-blue-600', 'text-white'); text.classList.add('font-semibold', 'text-blue-600'); } 
+                else { dot.classList.add('bg-gray-300', 'border-gray-400', 'text-gray-500'); text.classList.add('font-medium', 'text-gray-500'); }
+            }
+        }
+        function showStep(step) {
+            state.currentStep = step;
+            Object.values(stepContents).forEach(content => content.classList.add('hidden'));
+            if (stepContents[step]) stepContents[step].classList.remove('hidden');
+            stepsWrapper.classList.remove('hidden');
+            loader.classList.add('hidden');
+            updateStepIndicator(step);
+            window.scrollTo(0, 0);
+        }
+        function showLoader(text) {
+            hideError();
+            stepsWrapper.classList.add('hidden');
+            loaderText.textContent = text;
+            loader.classList.remove('hidden');
+        }
+        function showError(message) {
+            errorTextSpan.textContent = " " + message;
+            errorMessageDiv.classList.remove('hidden');
+            loader.classList.add('hidden');
+            stepsWrapper.classList.remove('hidden');
+        }
+        function hideError() {
+            errorMessageDiv.classList.add('hidden');
+        }
+
+        // --- LÓGICA DE DATOS Y GENERACIÓN (MODIFICADA) ---
+
+        /**
+         * Carga los archivos de currículo desde GitHub al iniciar la aplicación.
+         */
+        async function loadAllCurricula() {
+            // !! IMPORTANTE: REEMPLAZA ESTAS URLS POR LAS URLS "RAW" DE TUS ARCHIVOS EN GITHUB !!
+            const urls = {
+                "1º ESO": "https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/currículo_epva_gal_2022_1er-curso.md",
+                "3º ESO": "https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/currículo_epva_gal_2022_3er-curso.md"
+            };
+
+            try {
+                // Descarga ambos archivos en paralelo
+                const [response1, response3] = await Promise.all([
+                    fetch(urls["1º ESO"]),
+                    fetch(urls["3º ESO"])
+                ]);
+
+                if (!response1.ok || !response3.ok) {
+                    throw new Error(`Error al cargar los currículos. Código de estado: ${response1.status}, ${response3.status}`);
+                }
+
+                // Guarda el texto de cada archivo en el estado
+                state.curricula["1º ESO"] = await response1.text();
+                state.curricula["3º ESO"] = await response3.text();
+
+                console.log("Currículos de 1º y 3º de la ESO cargados con éxito.");
+
+            } catch (error) {
+                console.error("Fallo al cargar los currículos desde GitHub:", error);
+                showError("No se pudieron cargar los datos del currículo desde GitHub. La aplicación puede no funcionar correctamente. Revisa la consola para más detalles.");
+            }
+        }
+        
+        async function callGeminiAPI(prompt, jsonSchema = null) {
+            const apiKey = ""; // La clave se gestiona en el backend/entorno
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            if (jsonSchema) payload.generationConfig = { responseMimeType: "application/json", responseSchema: jsonSchema };
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({ error: { message: `Request failed with status ${response.status}` } }));
+                    throw new Error(errorBody?.error?.message || "Error desconocido en la API.");
+                }
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) return jsonSchema ? JSON.parse(text) : text;
+                throw new Error("Respuesta inesperada o vacía de la IA.");
+            } catch (error) {
+                console.error("Error en la llamada a la API:", error);
+                throw new Error(error.message || "Hubo un problema de conexión con la IA.");
+            }
+        }
+        
+        async function generateNarratives() {
+            hideError();
+            showLoader('EN PROCESO: Generando nuevas narrativas creativas...');
+            try {
+                const prompt = `Eres un asistente experto en diseño curricular para profesores de Educación Plástica, Visual e Audiovisual en Galicia. Un profesor quiere crear una Situación de Aprendizaje. Sus datos son:
+                - Tema: ${state.userInput.topic}
+                - Curso: ${state.userInput.course}
+                - Contexto del grupo: ${state.userInput.context}
+                - Atención a la diversidad: ${state.userInput.diversity}
+                - Número de sesiones: ${state.userInput.sessions}
+                
+                Basándote en esto, y buscando la creatividad y el engagement del alumnado, propón 3 narrativas o hilos conductores para esta Situación de Aprendizaje. Describe cada narrativa brevemente en un párrafo conciso.
+                
+                Devuelve la respuesta en formato JSON con una clave "narrativas" que contenga un array de objetos. Cada objeto debe tener las claves "titulo" y "descripcion".`;
+                const schema = { type: "OBJECT", properties: { narrativas: { type: "ARRAY", items: { type: "OBJECT", properties: { titulo: { type: "STRING" }, descripcion: { type: "STRING" } }, required: ["titulo", "descripcion"] } } } };
+                const result = await callGeminiAPI(prompt, schema);
+
+                if (result && result.narrativas) {
+                    state.narratives = result.narrativas;
+                    renderNarratives();
+                    showStep(2);
+                } else {
+                    throw new Error("La respuesta de la IA no contenía las narrativas esperadas.");
+                }
+            } catch(error) {
+                showError(error.message);
+                showStep(state.currentStep);
+            }
+        }
+        
+        async function handleNarrativeSelection(index) {
+            state.selectedNarrative = state.narratives[index];
+            showLoader('EN PROCESO: Desarrollando la Situación de Aprendizaje...');
+
+            try {
+                // Selecciona el currículo correcto del estado
+                const relevantCurriculum = state.curricula[state.userInput.course];
+                if (!relevantCurriculum) {
+                    throw new Error(`El currículo para ${state.userInput.course} no se ha cargado. Por favor, recarga la página.`);
+                }
+
+                const prompt = `Eres un asistente experto en diseño curricular para profesores de Educación Plástica, Visual e Audiovisual en Galicia. Desarrolla una Situación de Aprendizaje completa basada en la siguiente narrativa:
+                - Título Narrativa: "${state.selectedNarrative.titulo}"
+                - Descripción Narrativa: "${state.selectedNarrative.descripcion}"
+                
+                La situación es para el curso ${state.userInput.course}, durará ${state.userInput.sessions} sesiones y el tema principal es "${state.userInput.topic}".
+                Considera las siguientes necesidades de atención a la diversidad: "${state.userInput.diversity}".
+
+                Para cada sesión, describe la actividad principal de forma detallada y atractiva. Luego, completa los elementos curriculares basándote EXCLUSIVAMENTE en el siguiente texto del currículo oficial de Galicia para ${state.userInput.course}:
+
+                --- INICIO DEL CURRÍCULO OFICIAL ---
+                ${relevantCurriculum}
+                --- FIN DEL CURRÍCULO OFICIAL ---
+
+                Para cada sesión, también debes proponer:
+                - Instrumento de evaluación (Ej: Rúbrica de proxecto, Portfolio, Observación directa)
+                - Recursos (Ej: Proxector, Material de debuxo, Tablets con software específico)
+                - Estratexias de atención á diversidade (alineadas con las necesidades descritas)
+
+                Formato de Salida: Genera un objeto JSON con una clave "situacion" que sea un array de objetos. Cada objeto representa una sesión y debe tener las claves: "sesion_numero", "titulo_sesion", "descripcion_actividad", "saber_basico", "criterio_evaluacion", "instrumento_evaluacion", "recursos", y "atencion_diversidad". Asegúrate de que los valores para saber_basico y criterio_evaluacion sean extraídos directamente del texto del currículo proporcionado.`;
+
+                const schema = { type: "OBJECT", properties: { situacion: { type: "ARRAY", items: { type: "OBJECT", properties: { sesion_numero: { type: "NUMBER" }, titulo_sesion: { type: "STRING" }, descripcion_actividad: { type: "STRING" }, saber_basico: { type: "STRING" }, criterio_evaluacion: { type: "STRING" }, instrumento_evaluacion: { type: "STRING" }, recursos: { type: "STRING" }, atencion_diversidad: { type: "STRING" } }, required: ["sesion_numero", "titulo_sesion", "descripcion_actividad", "saber_basico", "criterio_evaluacion", "instrumento_evaluacion", "recursos", "atencion_diversidad"] } } } };
+                
+                const result = await callGeminiAPI(prompt, schema);
+
+                if (result && result.situacion) {
+                    state.learningSituation = result.situacion;
+                    renderDevelopment();
+                    showStep(3);
+                } else {
+                    throw new Error("La respuesta de la IA no contenía el desarrollo esperado.");
+                }
+            } catch (error) {
+                showError(error.message);
+                showStep(2);
+            }
+        }
+
+        // --- MANEJADORES DE EVENTOS Y FUNCIONES DE RENDERIZADO (sin cambios) ---
+        saForm.addEventListener('submit', (e) => { e.preventDefault(); state.userInput = Object.fromEntries(new FormData(saForm).entries()); generateNarratives(); });
+        document.getElementById('regenerate-narratives').addEventListener('click', generateNarratives);
+        function renderNarratives() {
+            narrativesContainer.innerHTML = '';
+            state.narratives.forEach((narrative, index) => {
+                const card = document.createElement('div');
+                card.className = 'card bg-gray-100 p-6 rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-500';
+                card.innerHTML = `<h3 class="text-lg font-bold text-blue-700">${narrative.titulo}</h3><p class="mt-2 text-gray-600">${narrative.descripcion}</p>`;
+                card.addEventListener('click', () => handleNarrativeSelection(index));
+                narrativesContainer.appendChild(card);
+            });
+        }
+        function renderDevelopment() {
+            saDevelopmentContainer.innerHTML = '';
+            const narrativeTitle = document.createElement('div');
+            narrativeTitle.className = 'p-4 bg-blue-50 rounded-lg mb-6';
+            narrativeTitle.innerHTML = `<h3 class="text-xl font-bold text-blue-800">Narrativa: ${state.selectedNarrative.titulo}</h3>`;
+            saDevelopmentContainer.appendChild(narrativeTitle);
+            state.learningSituation.forEach(session => {
+                const sessionDiv = document.createElement('div');
+                sessionDiv.className = 'border border-gray-200 rounded-lg p-4 mb-4';
+                // Simplifiqué la tabla para no mostrar la competencia específica, ya que la IA no la pide en el schema y se infiere del criterio.
+                sessionDiv.innerHTML = `
+                    <h4 class="text-lg font-bold mb-2">Sesión ${session.sesion_numero}: ${session.titulo_sesion}</h4>
+                    <p class="mb-4">${session.descripcion_actividad}</p>
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100"><tr><th scope="col" class="px-4 py-2">Elemento Curricular</th><th scope="col" class="px-4 py-2">Descripción</th></tr></thead>
+                        <tbody>
+                            <tr class="bg-white border-b"><th scope="row" class="px-4 py-2 font-medium">Saber Básico</th><td class="px-4 py-2">${session.saber_basico}</td></tr>
+                            <tr class="bg-gray-50 border-b"><th scope="row" class="px-4 py-2 font-medium">Criterio de Evaluación</th><td class="px-4 py-2">${session.criterio_evaluacion}</td></tr>
+                            <tr class="bg-white border-b"><th scope="row" class="px-4 py-2 font-medium">Instrumento Evaluación</th><td class="px-4 py-2">${session.instrumento_evaluacion}</td></tr>
+                            <tr class="bg-gray-50 border-b"><th scope="row" class="px-4 py-2 font-medium">Recursos</th><td class="px-4 py-2">${session.recursos}</td></tr>
+                            <tr class="bg-white"><th scope="row" class="px-4 py-2 font-medium">Atención á Diversidade</th><td class="px-4 py-2">${session.atencion_diversidad}</td></tr>
+                        </tbody></table></div>`;
+                saDevelopmentContainer.appendChild(sessionDiv);
+            });
+        }
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18); doc.text("Situación de Aprendizaxe: Ed. Plástica, Visual e Audiovisual", 14, 22);
+            doc.setFontSize(11); doc.setTextColor(100);
+            doc.text(`Curso: ${state.userInput.course}`, 14, 32); doc.text(`Tema: ${state.userInput.topic}`, 14, 38); doc.text(`Número de Sesións: ${state.userInput.sessions}`, 14, 44);
+            let yPosition = 56;
+            doc.setFontSize(14); doc.setTextColor(0, 0, 139); doc.text(`Narrativa: ${state.selectedNarrative.titulo}`, 14, yPosition);
+            yPosition += 6;
+            doc.setFontSize(11); doc.setTextColor(0);
+            const narrativeDesc = doc.splitTextToSize(state.selectedNarrative.descripcion, 180);
+            doc.text(narrativeDesc, 14, yPosition);
+            yPosition += narrativeDesc.length * 5 + 5;
+            state.learningSituation.forEach(session => {
+                if (yPosition > 250) { doc.addPage(); yPosition = 20; }
+                doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text(`Sesión ${session.sesion_numero}: ${session.titulo_sesion}`, 14, yPosition); yPosition += 7;
+                doc.setFontSize(11); doc.setFont(undefined, 'normal');
+                const activityDesc = doc.splitTextToSize(session.descripcion_actividad, 180);
+                doc.text(activityDesc, 14, yPosition);
+                yPosition += activityDesc.length * 5 + 5;
+                const tableData = [
+                    ["Saber Básico", session.saber_basico], ["Criterio de Avaliación", session.criterio_evaluacion], ["Instrumento de Avaliación", session.instrumento_evaluacion], ["Recursos", session.recursos], ["Atención á Diversidade", session.atencion_diversidad]
+                ];
+                doc.autoTable({ startY: yPosition, head: [['Elemento', 'Descrición']], body: tableData, theme: 'grid', headStyles: { fillColor: [22, 160, 133] }, columnStyles: { 0: { fontStyle: 'bold' } } });
+                yPosition = doc.autoTable.previous.finalY + 15;
+            });
+            doc.save(`SA_${state.userInput.topic.replace(/\s/g, '_')}.pdf`);
+        }
+        document.getElementById('back-to-step-1').addEventListener('click', () => showStep(1));
+        document.getElementById('back-to-step-2').addEventListener('click', () => showStep(2));
+        document.getElementById('approve-sa').addEventListener('click', () => showStep(4));
+        document.getElementById('download-pdf').addEventListener('click', generatePDF);
+        document.getElementById('start-over').addEventListener('click', () => { Object.assign(state, { currentStep: 1, userInput: {}, narratives: [], selectedNarrative: null, learningSituation: null, curricula: state.curricula }); saForm.reset(); hideError(); showStep(1); });
+
+        // --- INICIO DE LA APP ---
+        // Carga todos los currículos al iniciar la aplicación.
+        loadAllCurricula();
+        showStep(1);
+
+    </script>
+</body>
+</html>
