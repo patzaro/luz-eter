@@ -1,35 +1,65 @@
 # Proyecto: Servidor MCP con FastAPI
 
-Creado por por Copilot con mi inestimable ayuda.
+Creado por Copilot con mi inestimable ayuda.
 
 ## Lo que hemos construido
 
-Hasta ahora, hemos desarrollado un servidor MCP básico en Python usando FastAPI, que expone una API local con dos grandes capacidades:
+Hasta este punto, se ha desarrollado un servidor MCP funcional que utiliza FastAPI y permite interactuar con un archivo CSV como fuente de datos externa. El servidor expone dos endpoints clave:
 
-### 1. Lectura de datos desde archivo CSV
-- Creamos un archivo `usuarios.csv` como fuente de datos estructurada.
-- Implementamos el endpoint `GET /usuario_csv/{nombre}` que permite consultar los datos de un usuario específico desde el CSV.
-- El servidor filtra por nombre (ignorando mayúsculas) y devuelve los datos en formato JSON.
+### 1. `GET /usuario_csv/nombre`
+Consulta datos específicos desde el archivo `usuarios.csv`. Busca por nombre y devuelve edad y ciudad asociadas.
 
-### 2. Agregado dinámico de datos al CSV
-- Implementamos el endpoint `POST /agregar_usuario` para insertar nuevos registros en el archivo `usuarios.csv`.
-- La entrada se valida mediante un modelo `Usuario` que exige nombre, edad y ciudad.
-- Si el archivo no existe, se crea con encabezado; si existe, se añade el nuevo dato al final.
+### 2. `POST /agregar_usuario`
+Permite agregar nuevos registros al archivo CSV. Recibe los datos en formato JSON, los valida y los añade al archivo, creando el archivo si aún no existe.
 
-## Para qué sirve este sistema
+---
 
-Este servidor MCP es una base funcional para conectar fuentes de datos simples a sistemas de inteligencia artificial, herramientas externas o dashboards. Sus utilidades incluyen:
+## Para qué sirve
 
-- Integración con modelos de lenguaje (LLM) para brindar respuestas con datos reales.
-- Simulación de un CRM ligero para gestionar usuarios.
-- Base para agregar nuevas funcionalidades como filtros, búsqueda avanzada, edición o eliminación de datos.
-- Punto de conexión para APIs, bases de datos u otros servicios que permitan enriquecer las capacidades de una IA.
+Este servidor MCP sirve como puente entre modelos de inteligencia artificial y datos reales. Puede ser utilizado para:
 
-## Próximos pasos sugeridos
+- Consultar y modificar fuentes externas de datos sin tener que acceder directamente a ellas.
+- Crear una capa de abstracción entre el modelo IA y el sistema operativo o la base de datos.
+- Desarrollar un asistente digital personalizado que interactúe con información local o de terceros.
+- Extender sus capacidades para conectar con APIs públicas, calendarios, bases de datos o sistemas de archivos.
 
-Podríamos continuar el proyecto con opciones como:
+---
 
-- Crear el endpoint `GET /usuarios` para listar todos los registros.
-- Implementar edición y borrado de registros por nombre o ID.
-- Integrar el servidor con una IA usando LangChain u otro cliente MCP.
-- Conectar el servidor con APIs externas o bases de datos reales.
+## Cómo se prueba el servidor
+
+### 1. Ejecutar el servidor
+
+Desde una terminal en la carpeta del proyecto, lanza el servidor con el siguiente comando:
+
+```bash
+py -m uvicorn main:app --reload
+```
+
+Esto iniciará el servidor en la dirección local `http://127.0.0.1:8000`.
+
+### 2. Acceder a la interfaz de pruebas (Swagger UI)
+
+Abre tu navegador y entra en:
+
+```
+http://127.0.0.1:8000/docs
+```
+
+Desde esta interfaz podrás probar los endpoints interactivos:
+
+- Selecciona `GET /usuario_csv/{nombre}` → escribe un nombre y ejecuta para ver los datos que devuelve.
+- Selecciona `POST /agregar_usuario` → escribe un JSON con los datos del nuevo usuario y ejecuta para agregarlo.
+
+### 3. Validar los resultados
+
+- Puedes comprobar los cambios en el archivo `usuarios.csv` desde la terminal o abriéndolo con cualquier editor de texto.
+- También puedes usar herramientas como `curl`, Postman o escribir scripts en Python para enviar peticiones HTTP al servidor.
+
+---
+
+## Siguientes pasos posibles
+
+- Endpoint `GET /usuarios` para listar todos los registros.
+- `PUT` o `PATCH` para editar datos existentes.
+- `DELETE` para eliminar registros específicos.
+- Integración directa con IA vía clientes MCP como LangChain o Semantic Kernel.
