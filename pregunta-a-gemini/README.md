@@ -6,7 +6,7 @@ Sigue estos pasos:
 
 ## 1. Obtención de la Clave API de Gemini
 
-Dentro de Google AI Studio, busca la opción para "Get API key" o "Crear clave de API". Es posible que esté en la sección de "API access" o "API keys". Sigue las instrucciones para generar una nueva clave.
+Dentro de Google AI Studio (https://aistudio.google.com/), busca la opción para "Get API key" o "Crear clave de API". Es posible que esté en la sección de "API access" o "API keys". Sigue las instrucciones para generar una nueva clave.
 
 ## 2. Configuración del Backend Seguro con Google Apps Script
 
