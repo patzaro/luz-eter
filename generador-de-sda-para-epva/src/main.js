@@ -3,4 +3,9 @@ import './style.css';
 import App from './App.vue';
 import router from './router';
 
-createApp(App).use(router).mount('#app');
+import { createPinia } from 'pinia';
+
+const app = createApp(App);
+app.use(createPinia());              // 👈 activar pinia
+app.use(router);
+app.mount('#app');

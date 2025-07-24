@@ -1,68 +1,66 @@
 <template>
   <section>
-    <h2>Selecciona una narrativa educativa</h2>
+    <h2>Selecciona una narrativa para continuar</h2>
 
-    <div v-if="loading">Cargando narrativas...</div>
-    <ul v-else>
-      <li v-for="(narrativa, index) in narrativas" :key="index">
-        <label>
-          <input
-            type="radio"
-            :value="narrativa"
-            v-model="seleccionada"
-          />
-          {{ narrativa }}
-        </label>
-      </li>
-    </ul>
+    <div v-if="sda.narrativas.length === 0">
+      <p>No hay narrativas generadas. ¿Volvemos al paso anterior?</p>
+      <button @click="router.push('/')">Volver a inicio</button>
+    </div>
 
-    <button @click="continuar" :disabled="!seleccionada">
-      Continuar al desarrollo curricular
-    </button>
+    <div v-else>
+      <ul>
+        <li
+          v-for="(narrativa, index) in sda.narrativas"
+          :key="index"
+          class="narrativa"
+        >
+          <label>
+            <input
+              type="radio"
+              :value="narrativa"
+              v-model="sda.narrativaElegida"
+            />
+            {{ narrativa }}
+          </label>
+        </li>
+      </ul>
+
+      <button
+        @click="continuar"
+        :disabled="!sda.narrativaElegida"
+      >
+        Continuar al desarrollo curricular
+      </button>
+    </div>
   </section>
 </template>
 
-<script>
+<script setup>
 import { useRouter } from 'vue-router';
+import { useSdaStore } from '../stores/sdaStore';
 
-export default {
-  name: 'Step2',
-  data() {
-    return {
-      narrativas: [],
-      seleccionada: '',
-      loading: true
-    };
-  },
-  mounted() {
-    // Puedes reemplazar esto con datos compartidos más adelante
-    fetch('/api/generar-narrativas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic: 'El color como lenguaje',
-        course: '1º ESO',
-        context: 'Grupo con alta sensibilidad artística',
-        diversity: 'Adaptaciones por TDAH',
-        sessions: 6
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        this.narrativas = data.narrativas;
-        this.loading = false;
-      });
-  },
-  setup() {
-    const router = useRouter();
-    return { router };
-  },
-  methods: {
-    continuar() {
-      console.log('Narrativa seleccionada:', this.seleccionada);
-      this.router.push('/desarrollo');
-    }
-  }
+const router = useRouter();
+const sda = useSdaStore();
+
+const continuar = () => {
+  console.log('Narrativa seleccionada:', sda.narrativaElegida);
+  router.push('/desarrollo'); // Redirige a Step3.vue
 };
 </script>
 
+<style scoped>
+section {
+  max-width: 700px;
+  margin: auto;
+  padding: 2rem;
+}
+.narrativa {
+  margin-bottom: 1rem;
+  border-left: 3px solid #42b883;
+  padding-left: 1rem;
+}
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+}
+</style>
