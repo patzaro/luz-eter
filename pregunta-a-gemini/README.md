@@ -1,4 +1,8 @@
-Integra Gemini en tu Aplicación Web con una Clave API Gratuita.
+# Integra Gemini en tu aplicación web con una clave API Gratuita
+
+En este proyecto intento explicar cómo puedo integrar la IA dentro de una aplicación creada por mí.
+
+Sigue estos pasos:
 
 ## 1. Obtención de la Clave API de Gemini
 
