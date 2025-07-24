@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat con Gemini</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #responseArea { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border: 1px solid #eee; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
+        .loading { color: #888; font-style: italic; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pregunta a Gemini</h1>
+        <textarea id="userInput" placeholder="Escribe tu pregunta aquí..."></textarea>
+        <button onclick="askGemini()">Enviar Pregunta</button>
+        <div id="responseArea">Esperando tu pregunta...</div>
+    </div>
+
+    <script>
+        // ¡IMPORTANTE! Reemplaza esta URL con la URL de tu aplicación web de Google Apps Script
+        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'TU_URL_DE_APPS_SCRIPT_AQUÍ';
+
+        async function askGemini() {
+            const userInput = document.getElementById('userInput').value;
+            const responseArea = document.getElementById('responseArea');
+
+            if (!userInput.trim()) {
+                responseArea.innerHTML = '<span class="error">Por favor, introduce una pregunta.</span>';
+                return;
+            }
+
+            responseArea.innerHTML = '<span class="loading">Pensando...</span>';
+
+            try {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'cors', // Crucial para peticiones entre dominios
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: userInput })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.response) {
+                    responseArea.innerText = data.response;
+                } else if (data.error) {
+                    responseArea.innerHTML = `<span class="error">Error: ${data.error}</span><br><small>Detalles: ${data.details || 'No hay detalles disponibles.'}</small>`;
+                } else {
+                    responseArea.innerHTML = '<span class="error">Respuesta inesperada del servidor.</span>';
+                }
+
+            } catch (error) {
+                responseArea.innerHTML = `<span class="error">Ocurrió un error al conectar con el backend: ${error.message}</span>`;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
