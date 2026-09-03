@@ -10,7 +10,7 @@ Este es el primer repositorio que creé en GitHUb.
   Guía creada con Claude Sonnet 4 para publicar apps en GitHub.
 
 - **equilibrio-simetrico-y-asimetrico**  
-  App con teoría y ejercicios sobre composición visual para tercer curso. https://patzaro.github.io/luz-eter/equilibrio-simetrico-y-asimetrico
+  App con teoría y ejercicios sobre composición visual para tercer curso. <https://patzaro.github.io/luz-eter/equilibrio-simetrico-y-asimetrico>
 
 - **generador-de-números-aleatorios**  
   Aplicación creada en Google AI Studio para generar números aleatorios.
