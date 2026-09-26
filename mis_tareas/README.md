@@ -8,3 +8,4 @@ Le pedí a Deepseek una app y me hizo ésta.
 
 * Qué incluye: añadir tareas, marcarlas como completadas, eliminarlas, filtros (todas / pendientes / completadas), contador y persistencia en localStorage, así que no pierdes nada al cerrar.
 
+https://patzaro.github.io/luz-eter/mis_tareas/
