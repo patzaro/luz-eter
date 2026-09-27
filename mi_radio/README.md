@@ -26,7 +26,17 @@ https://servidor.com/hls/radio.m3u8
 
 - CORS: algunos servidores bloquean la reproducción desde otra web. Si una emisora no suena, prueba a abrir su URL directamente en el navegador. Si ahí sí suena pero en la app no, es CORS y no hay solución desde el HTML.
 
-- HLS (.m3u8): funciona en Safari de forma nativa y en el resto mediante hls.js, que se carga automáticamente desde un CDN (solo la primera vez que reproduces una emisora HLS).
+## ¿Cómo fue creada la app?
+Con DeepSeek, a la primera. https://chat.deepseek.com/share/7oc4tzg8b48h65sdl7
+
+## Futuras mejoras
+¿Quieres que le añada algo más? Por ejemplo:
+
+- Lista de emisoras preinstaladas (podría meter unas cuantas españolas de ejemplo).
+- Buscador integrado que consulte la API de radio-browser y te deje añadir con un clic.
+- Modo favoritos o categorías por género.
+- Botón de "aleatorio" para saltar entre emisoras.
 
 
 
+ 
