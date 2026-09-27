@@ -1,3 +1,5 @@
+Es una app web para gestión de tareas.
+
 Le pedí a Deepseek una app y me hizo ésta.
 
 
