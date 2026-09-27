@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Radio</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#e2e8f0;
+    --muted:#94a3b8; --accent:#38bdf8; --ok:#4ade80; --danger:#f87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(circle at top,#1e293b,#0f172a 70%);
+    min-height:100vh; color:var(--text); padding:32px 16px 140px;
+    display:flex; justify-content:center;
+  }
+  .app{width:100%;max-width:640px}
+  header{margin-bottom:22px}
+  h1{font-size:1.6rem;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:.85rem}
+
+  form{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px;margin-bottom:12px}
+  input{
+    padding:12px 14px;border-radius:10px;border:1px solid var(--line);
+    background:#0f172a;color:var(--text);font-size:.9rem;outline:none;
+    font-family:inherit;width:100%;
+  }
+  input:focus{border-color:var(--accent)}
+  button{
+    font-family:inherit;cursor:pointer;border:none;border-radius:10px;
+    font-size:.9rem;background:#334155;color:var(--text);padding:0 16px;
+  }
+  button:hover{filter:brightness(1.15)}
+  #form button{background:var(--accent);color:#0f172a;font-weight:600}
+
+  .tools{display:flex;gap:8px;margin-bottom:16px}
+  .tools input{flex:1}
+  .tools button{font-size:.8rem;padding:10px 14px;background:transparent;
+    border:1px solid var(--line);color:var(--muted)}
+  .tools button:hover{color:var(--text);border-color:var(--muted)}
+
+  ul{list-style:none}
+  li{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    margin-bottom:8px;transition:border-color .15s;
+  }
+  li.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .play{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    background:#334155;color:var(--text);font-size:.85rem;
+    display:grid;place-items:center;
+  }
+  li.active .play{background:var(--accent);color:#0f172a}
+  .info{flex:1;min-width:0}
+  .info strong{display:block;font-size:.95rem;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .info small{color:var(--muted);font-size:.75rem;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .icon{background:transparent;color:var(--muted);padding:6px 8px;font-size:1rem}
+  .icon:hover{color:var(--text)}
+  .icon.del:hover{color:var(--danger)}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 0;font-size:.9rem}
+  .hidden{display:none}
+
+  .player{
+    position:fixed;left:0;right:0;bottom:0;background:rgba(15,23,42,.96);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    padding:12px 16px;display:flex;align-items:center;gap:16px;
+    justify-content:center;flex-wrap:wrap;
+  }
+  .player .inner{display:flex;align-items:center;gap:16px;width:100%;max-width:640px}
+  .now{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+  .dot{width:9px;height:9px;border-radius:50%;background:#475569;flex-shrink:0}
+  .dot.on{background:var(--ok);animation:pulse 1.4s infinite}
+  .dot.err{background:var(--danger)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .now .meta{min-width:0}
+  .now strong{display:block;font-size:.9rem;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .now small{color:var(--muted);font-size:.75rem}
+  .controls{display:flex;align-items:center;gap:8px}
+  .controls button{width:42px;height:42px;border-radius:50%;
+    background:#334155;display:grid;place-items:center;font-size:1rem}
+  #playBtn{background:var(--accent);color:#0f172a}
+  #volume{width:90px;accent-color:var(--accent)}
+
+  @media (max-width:560px){
+    form{grid-template-columns:1fr}
+    #volume{width:60px}
+    .now small{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>📻 Mi Radio</h1>
+    <p class="sub">Guarda tus emisoras y escúchalas cuando quieras</p>
+  </header>
+
+  <form id="form">
+    <input type="text" id="name" placeholder="Nombre (ej. Radio Clásica)" required>
+    <input type="url" id="url" placeholder="URL del stream (https://...)" required>
+    <button type="submit">Añadir</button>
+  </form>
+
+  <div class="tools">
+    <input type="search" id="search" placeholder="Buscar emisora...">
+    <button id="export" type="button">Exportar</button>
+    <button id="import" type="button">Importar</button>
+    <input type="file" id="file" accept=".json" hidden>
+  </div>
+
+  <ul id="list"></ul>
+  <p class="empty" id="empty">No tienes emisoras guardadas. Añade la primera arriba 👆</p>
+</div>
+
+<div class="player">
+  <div class="inner">
+    <div class="now">
+      <span class="dot" id="dot"></span>
+      <div class="meta">
+        <strong id="nowName">Sin reproducción</strong>
+        <small id="nowStatus">Elige una emisora</small>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="playBtn" title="Reproducir / Pausar">▶</button>
+      <button id="stopBtn" title="Detener">■</button>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+const $ = s => document.querySelector(s);
+const KEY = 'radio.v1';
+
+let stations = JSON.parse(localStorage.getItem(KEY) || '[]');
+let currentId = null;
+let hls = null;
+
+const audio = $('#audio');
+const dot = $('#dot');
+const nowName = $('#nowName');
+const nowStatus = $('#nowStatus');
+const playBtn = $('#playBtn');
+
+audio.volume = $('#volume').value;
+const save = () => localStorage.setItem(KEY, JSON.stringify(stations));
+
+/* ---------- Carga del stream (soporta .m3u8 con hls.js) ---------- */
+function loadHlsJs(){
+  return new Promise((res, rej) => {
+    if (window.Hls) return res();
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
+    s.onload = res;
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function loadStream(url){
+  if (hls){ hls.destroy(); hls = null; }
+  audio.removeAttribute('src');
+  audio.load();
+
+  const isHls = /\.m3u8(\?|$)/i.test(url);
+
+  if (isHls){
+    if (audio.canPlayType('application/vnd.apple.mpegurl')){
+      audio.src = url;                 // Safari / iOS
+    } else {
+      try {
+        await loadHlsJs();
+        if (window.Hls && window.Hls.isSupported()){
+          hls = new window.Hls({ lowLatencyMode: false });
+          hls.loadSource(url);
+          hls.attachMedia(audio);
+        } else {
+          audio.src = url;
+        }
+      } catch(e){
+        audio.src = url;
+      }
+    }
+  } else {
+    audio.src = url;
+  }
+
+  audio.play().catch(() => setStatus('No se pudo reproducir', 'err'));
+}
+
+/* ---------- Estado del reproductor ---------- */
+function setStatus(text, cls = ''){
+  nowStatus.textContent = text;
+  dot.className = 'dot' + (cls ? ' ' + cls : '');
+}
+
+function playStation(st){
+  currentId = st.id;
+  nowName.textContent = st.name;
+  setStatus('Cargando...');
+  playBtn.textContent = '⏸';
+  loadStream(st.url);
+  render();
+}
+
+function stopPlayback(){
+  audio.pause();
+  if (hls){ hls.destroy(); hls = null; }
+  audio.removeAttribute('src');
+  audio.load();
+  currentId = null;
+  playBtn.textContent = '▶';
+  nowName.textContent = 'Sin reproducción';
+  setStatus('Elige una emisora');
+  dot.className = 'dot';
+  render();
+}
+
+/* ---------- Eventos del audio ---------- */
+audio.addEventListener('playing', () => setStatus('Reproduciendo', 'on'));
+audio.addEventListener('pause',   () => { if (audio.src) setStatus('En pausa'); });
+audio.addEventListener('waiting', () => setStatus('Cargando...'));
+audio.addEventListener('error',   () => setStatus('Error: stream no disponible', 'err'));
+
+playBtn.addEventListener('click', () => {
+  if (!currentId) return;
+  if (audio.paused) audio.play().catch(()=>setStatus('No se pudo reproducir','err'));
+  else audio.pause();
+});
+audio.addEventListener('play',  () => playBtn.textContent = '⏸');
+audio.addEventListener('pause', () => playBtn.textContent = '▶');
+$('#stopBtn').addEventListener('click', stopPlayback);
+
+$('#volume').addEventListener('input', e => audio.volume = e.target.value);
+
+/* ---------- Lista de emisoras ---------- */
+function render(){
+  const list = $('#list');
+  const q = $('#search').value.trim().toLowerCase();
+  const visible = stations.filter(s =>
+    s.name.toLowerCase().includes(q) || s.url.toLowerCase().includes(q)
+  );
+
+  list.innerHTML = '';
+  $('#empty').classList.toggle('hidden', stations.length > 0);
+  if (!stations.length) return;
+
+  if (!visible.length){
+    const p = document.createElement('li');
+    p.style.justifyContent = 'center';
+    p.style.color = 'var(--muted)';
+    p.textContent = 'Sin resultados';
+    list.appendChild(p);
+    return;
+  }
+
+  visible.forEach(st => {
+    const li = document.createElement('li');
+    if (st.id === currentId) li.classList.add('active');
+
+    const play = document.createElement('button');
+    play.className = 'play';
+    play.textContent = st.id === currentId && !audio.paused ? '⏸' : '▶';
+    play.title = 'Reproducir';
+    play.addEventListener('click', e => {
+      e.stopPropagation();
+      if (st.id === currentId){
+        audio.paused ? audio.play() : audio.pause();
+      } else {
+        playStation(st);
+      }
+    });
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    const strong = document.createElement('strong');
+    strong.textContent = st.name;
+    const small = document.createElement('small');
+    small.textContent = st.url;
+    info.append(strong, small);
+    info.addEventListener('click', () => playStation(st));
+
+    const edit = document.createElement('button');
+    edit.className = 'icon';
+    edit.textContent = '✎';
+    edit.title = 'Editar';
+    edit.addEventListener('click', e => {
+      e.stopPropagation();
+      const n = prompt('Nombre de la emisora:', st.name);
+      if (n === null) return;
+      const u = prompt('URL del stream:', st.url);
+      if (u === null) return;
+      st.name = n.trim() || st.name;
+      st.url = u.trim() || st.url;
+      save(); render();
+      if (st.id === currentId) nowName.textContent = st.name;
+    });
+
+    const del = document.createElement('button');
+    del.className = 'icon del';
+    del.textContent = '✕';
+    del.title = 'Eliminar';
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!confirm(`¿Eliminar "${st.name}"?`)) return;
+      if (st.id === currentId) stopPlayback();
+      stations = stations.filter(x => x.id !== st.id);
+      save(); render();
+    });
+
+    li.append(play, info, edit, del);
+    list.appendChild(li);
+  });
+}
+
+/* ---------- Añadir ---------- */
+$('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('#name').value.trim();
+  const url  = $('#url').value.trim();
+  if (!name || !url) return;
+  stations.unshift({ id: Date.now() + Math.random(), name, url });
+  $('#name').value = '';
+  $('#url').value = '';
+  save(); render();
+});
+
+$('#search').addEventListener('input', render);
+
+/* ---------- Import / Export ---------- */
+$('#export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(stations, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'emisoras.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$('#import').addEventListener('click', () => $('#file').click());
+$('#file').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw new Error();
+      const ids = new Set(stations.map(s => s.id));
+      data.forEach(s => {
+        if (!s.name || !s.url) return;
+        stations.push({ id: ids.has(s.id) ? Date.now()+Math.random() : (s.id ?? Date.now()+Math.random()), name:s.name, url:s.url });
+      });
+      save(); render();
+      alert('Emisoras importadas ✔');
+    } catch(err){
+      alert('El archivo no es válido.');
+    }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
+});
+
+render();
+</script>
+</body>
+</html>
