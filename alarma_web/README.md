@@ -1,4 +1,5 @@
-Creada por Deepseek 4.2 flash, superando a Claude Sonnet 5.5 y dejando muy atrás a GLM 5.3.
+- Creada por Deepseek 4.2 flash, superando a Claude Sonnet 5.5 y dejando muy atrás a GLM 5.3.
+- Incluyo también la app que creó Claude con el mismo prompt.
 
 # ⏰ Alarma Web
 
