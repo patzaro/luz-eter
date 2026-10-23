@@ -1,3 +1,5 @@
+Creada por Deepseek 4.2 flash, superando a Claude Sonnet 5.5 y dejando muy atrás a GLM 5.3.
+
 # ⏰ Alarma Web
 
 Una aplicación web de alarma ligera, sin dependencias y completamente funcional que funciona directamente en el navegador. Permite programar una alarma con hora, sonido, duración y volumen personalizados, con cuenta atrás en tiempo real y pantalla de aviso a pantalla completa.
