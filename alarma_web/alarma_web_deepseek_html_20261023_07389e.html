@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alarma Web</title>
+<style>
+  :root{
+    --text:#eaf0ff;
+    --muted:#8b96b8;
+    --border:rgba(255,255,255,.12);
+    --accent:#6c8cff;
+    --accent2:#a56bff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; min-height:100vh;
+    font-family:"Segoe UI", system-ui, -apple-system, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 800px at 15% -10%, #1c2a5e 0%, transparent 60%),
+      radial-gradient(900px 700px at 110% 110%, #43206b 0%, transparent 60%),
+      #070a16;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px 16px;
+  }
+  .card{
+    width:100%; max-width:520px;
+    background:rgba(255,255,255,.055);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:28px;
+    backdrop-filter:blur(14px);
+    box-shadow:0 30px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  /* ---------- Reloj ---------- */
+  .clock{text-align:center; margin-bottom:26px;}
+  .clock .time{
+    font-size:clamp(46px, 13vw, 72px);
+    font-weight:700;
+    letter-spacing:2px;
+    font-variant-numeric:tabular-nums;
+    line-height:1;
+    background:linear-gradient(135deg,#ffffff,#9db4ff 60%,#c9a6ff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(108,140,255,.25);
+  }
+  .clock .date{
+    margin-top:8px; font-size:13px; color:var(--muted);
+    text-transform:capitalize; letter-spacing:.5px;
+  }
+
+  /* ---------- Formulario ---------- */
+  .form{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .field{display:flex; flex-direction:column; gap:8px;}
+  .field > span{
+    font-size:11px; font-weight:700; letter-spacing:.8px;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .field > span b{color:var(--accent); font-size:12px;}
+  .field input, .field select{
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px 14px;
+    color:var(--text);
+    font-size:16px;
+    font-family:inherit;
+    outline:none;
+    color-scheme:dark;
+    transition:.2s;
+    width:100%;
+  }
+  .field input:focus, .field select:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(108,140,255,.18);
+  }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    background:transparent; padding:0; height:26px; border:none;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:6px; border-radius:99px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:.85;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:20px; height:20px; border-radius:50%;
+    background:#fff; margin-top:-7px;
+    box-shadow:0 2px 10px rgba(0,0,0,.5);
+    cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{
+    height:6px; border-radius:99px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border:none; border-radius:50%;
+    background:#fff; cursor:pointer;
+  }
+
+  .actions{grid-column:1 / -1; display:flex; gap:10px; margin-top:6px;}
+
+  /* ---------- Botones ---------- */
+  .btn{
+    border:none; border-radius:14px;
+    padding:15px 18px;
+    font-size:15px; font-weight:700; font-family:inherit;
+    cursor:pointer; transition:transform .15s, box-shadow .2s, background .2s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; flex:1;
+    box-shadow:0 10px 28px rgba(108,140,255,.35);
+  }
+  .btn.primary:hover{box-shadow:0 14px 34px rgba(108,140,255,.5);}
+  .btn.ghost{
+    background:rgba(255,255,255,.07); color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn.ghost:hover{background:rgba(255,255,255,.12);}
+  .btn.small{
+    padding:9px 14px; font-size:13px; border-radius:10px;
+    background:rgba(255,255,255,.08); color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn.danger{
+    background:linear-gradient(135deg,#ff5f6d,#ff2e63);
+    color:#fff; padding:18px 56px; font-size:18px;
+    box-shadow:0 12px 34px rgba(255,46,99,.45);
+    border-radius:999px;
+  }
+
+  /* ---------- Panel de estado ---------- */
+  .status{margin-top:18px;}
+  .status.active{
+    background:rgba(108,140,255,.09);
+    border:1px solid rgba(108,140,255,.32);
+    border-radius:16px;
+    padding:16px 18px;
+    animation:fadeIn .35s ease;
+  }
+  @keyframes fadeIn{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;}}
+  .status-row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .status-label{
+    font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--accent); font-weight:800;
+  }
+  .status-time{
+    font-size:30px; font-weight:700; font-variant-numeric:tabular-nums;
+    line-height:1.15; margin-top:2px;
+  }
+  .status-meta{font-size:12px; color:var(--muted); margin-top:2px;}
+  .countdown{
+    margin-top:12px; padding-top:12px;
+    border-top:1px dashed rgba(255,255,255,.14);
+    font-size:14px; color:#b9c6ea; font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- Overlay de alarma ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(5,8,18,.86);
+    backdrop-filter:blur(12px);
+    opacity:0; pointer-events:none;
+    transition:opacity .3s;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .alarm-box{text-align:center; padding:24px;}
+  .bell{
+    font-size:76px; line-height:1;
+    display:inline-block;
+    transform-origin:top center;
+    animation:ring .55s ease-in-out infinite;
+    filter:drop-shadow(0 0 26px rgba(255,200,80,.6));
+  }
+  @keyframes ring{
+    0%,100%{transform:rotate(-16deg);}
+    50%{transform:rotate(16deg);}
+  }
+  .alarm-box h2{
+    font-size:34px; margin:14px 0 4px;
+    background:linear-gradient(135deg,#fff,#ffd0d8);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .alarm-box p{
+    color:var(--muted); margin:0 0 30px;
+    font-size:22px; font-variant-numeric:tabular-nums; font-weight:600;
+  }
+  .pulse{
+    position:absolute; width:320px; height:320px; border-radius:50%;
+    border:2px solid rgba(255,95,109,.35);
+    animation:pulse 1.8s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes pulse{
+    0%{transform:scale(.6); opacity:.9;}
+    100%{transform:scale(1.6); opacity:0;}
+  }
+
+  @media (max-width:440px){
+    .card{padding:20px;}
+    .form{grid-template-columns:1fr;}
+    .btn.danger{padding:16px 40px; font-size:16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="clock">
+    <div class="time" id="clock">--:--:--</div>
+    <div class="date" id="date">—</div>
+  </div>
+
+  <div class="form">
+    <label class="field">
+      <span>Hora de la alarma</span>
+      <input type="time" id="alarmTime" step="60">
+    </label>
+
+    <label class="field">
+      <span>Sonido</span>
+      <select id="sound">
+        <option value="clasico">Beep clásico</option>
+        <option value="digital">Digital</option>
+        <option value="campana">Campana</option>
+        <option value="sirena">Sirena</option>
+        <option value="melodia">Melodía</option>
+        <option value="suave">Despertar suave</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Duración <b id="durLabel">20 s</b></span>
+      <input type="range" id="duration" min="5" max="120" step="5" value="20">
+    </label>
+
+    <label class="field">
+      <span>Volumen <b id="volLabel">70 %</b></span>
+      <input type="range" id="volume" min="0" max="100" step="5" value="70">
+    </label>
+
+    <div class="actions">
+      <button class="btn primary" id="setBtn">Activar alarma</button>
+      <button class="btn ghost" id="testBtn">Probar sonido</button>
+    </div>
+  </div>
+
+  <div class="status" id="status"></div>
+</div>
+
+<!-- Pantalla cuando suena la alarma -->
+<div class="overlay" id="overlay">
+  <div class="pulse"></div>
+  <div class="alarm-box">
+    <div class="bell">🔔</div>
+    <h2>¡Alarma!</h2>
+    <p id="overlayTime">07:00</p>
+    <button class="btn danger" id="stopBtn">Detener</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   1. MOTOR DE AUDIO (Web Audio API)
+   ========================================================= */
+let audioCtx = null;
+
+function getCtx(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+/** Crea una nota/tono con envolvente suave. */
+function tone(ctx, o){
+  const dest   = o.dest || ctx.destination;
+  const start  = o.start;
+  const dur    = o.dur;
+  const peak   = (o.gain !== undefined) ? o.gain : 0.3;
+  const attack = Math.min(0.02, dur / 3);
+
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(o.freq, start);
+  if(o.sweepTo) osc.frequency.linearRampToValueAtTime(o.sweepTo, start + dur);
+
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(peak, start + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+
+  osc.connect(g).connect(dest);
+  osc.start(start);
+  osc.stop(start + dur + 0.05);
+}
+
+/* --- Catálogo de sonidos: cada uno es un patrón que se repite --- */
+const SOUNDS = {
+  clasico: {
+    name: 'Beep clásico',
+    loop: 1.2,
+    pattern: (c, t, d) => {
+      for(let i = 0; i < 4; i++){
+        tone(c, { freq: 880, start: t + i * 0.25, dur: 0.12, type: 'square', gain: 0.30, dest: d });
+      }
+    }
+  },
+  digital: {
+    name: 'Digital',
+    loop: 1.0,
+    pattern: (c, t, d) => {
+      for(let i = 0; i < 3; i++){
+        tone(c, { freq: 1200, start: t + i * 0.3,       dur: 0.075, type: 'square', gain: 0.24, dest: d });
+        tone(c, { freq: 1650, start: t + i * 0.3 + 0.09, dur: 0.075, type: 'square', gain: 0.24, dest: d });
+      }
+    }
+  },
+  campana: {
+    name: 'Campana',
+    loop: 3.2,
+    pattern: (c, t, d) => {
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+        tone(c, { freq: f, start: t + i * 0.4, dur: 1.7, type: 'sine', gain: 0.35, dest: d });
+        tone(c, { freq: f * 2, start: t + i * 0.4, dur: 0.9, type: 'sine', gain: 0.10, dest: d });
+      });
+    }
+  },
+  sirena: {
+    name: 'Sirena',
+    loop: 1.4,
+    pattern: (c, t, d) => {
+      tone(c, { freq: 480,  sweepTo: 1150, start: t,       dur: 0.62, type: 'sawtooth', gain: 0.20, dest: d });
+      tone(c, { freq: 1150, sweepTo: 480,  start: t + 0.65, dur: 0.62, type: 'sawtooth', gain: 0.20, dest: d });
+    }
+  },
+  melodia: {
+    name: 'Melodía',
+    loop: 1.4,
+    pattern: (c, t, d) => {
+      const notas = [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25];
+      notas.forEach((f, i) => {
+        tone(c, { freq: f, start: t + i * 0.2, dur: 0.16, type: 'triangle', gain: 0.32, dest: d });
+      });
+    }
+  },
+  suave: {
+    name: 'Despertar suave',
+    loop: 2.8,
+    pattern: (c, t, d) => {
+      [440, 554.37, 659.25].forEach((f, i) => {
+        tone(c, { freq: f, start: t + i * 0.85, dur: 1.4, type: 'sine', gain: 0.28, dest: d });
+      });
+    }
+  }
+};
+
+/* =========================================================
+   2. REPRODUCCIÓN / PARADA
+   ========================================================= */
+let ringState = null;
+let previewMaster = null;
+
+function volumenActual(){ return parseInt(volume.value, 10) / 100; }
+
+function startRinging(key, durSeg){
+  stopRinging(true);
+  const ctx = getCtx();
+  const s = SOUNDS[key];
+
+  const master = ctx.createGain();
+  master.gain.value = volumenActual();
+  master.connect(ctx.destination);
+
+  const state = {
+    master,
+    nextTime: ctx.currentTime + 0.1,
+    end:      ctx.currentTime + 0.1 + durSeg,
+    timer: null
+  };
+
+  const pump = () => {
+    const now = ctx.currentTime;
+    // Programación con "lookahead" para que no haya cortes
+    while(state.nextTime < now + 0.7 && state.nextTime < state.end){
+      s.pattern(ctx, state.nextTime, master);
+      state.nextTime += s.loop;
+    }
+  };
+
+  pump();
+  state.timer = setInterval(pump, 150);
+  ringState = state;
+}
+
+function stopRinging(silencioso){
+  if(!ringState) return;
+  clearInterval(ringState.timer);
+  const ctx = getCtx();
+  const m = ringState.master;
+  try{
+    m.gain.cancelScheduledValues(ctx.currentTime);
+    m.gain.setValueAtTime(m.gain.value, ctx.currentTime);
+    m.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + (silencioso ? 0.02 : 0.12));
+    setTimeout(() => { try{ m.disconnect(); }catch(e){} }, 300);
+  }catch(e){}
+  ringState = null;
+}
+
+function previewSound(){
+  const ctx = getCtx();
+  if(previewMaster){ try{ previewMaster.disconnect(); }catch(e){} }
+  const master = ctx.createGain();
+  master.gain.value = volumenActual();
+  master.connect(ctx.destination);
+  previewMaster = master;
+
+  const s = SOUNDS[sound.value];
+  s.pattern(ctx, ctx.currentTime + 0.05, master);
+
+  setTimeout(() => {
+    try{ master.disconnect(); }catch(e){}
+    if(previewMaster === master) previewMaster = null;
+  }, s.loop * 1000 + 400);
+}
+
+/* =========================================================
+   3. ESTADO DE LA ALARMA
+   ========================================================= */
+let alarma = null;      // { h, m, sonido, duracion, target }
+let sonando = false;
+let autoStopId = null;
+
+const $ = id => document.getElementById(id);
+const clockEl  = $('clock');
+const dateEl   = $('date');
+const timeEl   = $('alarmTime');
+const sound    = $('sound');
+const duration = $('duration');
+const volume   = $('volume');
+const durLabel = $('durLabel');
+const volLabel = $('volLabel');
+const statusEl = $('status');
+const overlay  = $('overlay');
+
+const pad = n => String(n).padStart(2, '0');
+
+/* Hora por defecto: dentro de 1 minuto */
+(function initTime(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + 1);
+  timeEl.value = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+})();
+
+/* Próxima aparición de esa hora (hoy o mañana) */
+function proximaOcurrencia(h, m){
+  const ahora = new Date();
+  const target = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), h, m, 0, 0);
+  if(target.getTime() <= ahora.getTime()) target.setDate(target.getDate() + 1);
+  return target;
+}
+
+/* =========================================================
+   4. RENDERIZADO
+   ========================================================= */
+function renderEstado(){
+  if(!alarma){
+    statusEl.className = 'status';
+    statusEl.innerHTML = '';
+    return;
+  }
+  const esManana = alarma.target.getDate() !== new Date().getDate();
+  statusEl.className = 'status active';
+  statusEl.innerHTML = `
+    <div class="status-row">
+      <div>
+        <div class="status-label">● Alarma activada</div>
+        <div class="status-time">${pad(alarma.h)}:${pad(alarma.m)}</div>
+        <div class="status-meta">
+          ${SOUNDS[alarma.sonido].name} · ${alarma.duracion}s${esManana ? ' · mañana' : ''}
+        </div>
+      </div>
+      <button class="btn small" id="cancelBtn">Cancelar</button>
+    </div>
+    <div class="countdown" id="countdown">—</div>
+  `;
+  $('cancelBtn').onclick = () => { alarma = null; renderEstado(); };
+  actualizarCuentaAtras();
+}
+
+function actualizarCuentaAtras(){
+  const el = $('countdown');
+  if(!el || !alarma) return;
+  let ms = alarma.target.getTime() - Date.now();
+  if(ms < 0) ms = 0;
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+
+  let txt = 'Suena en ';
+  if(h > 0)      txt += `${h} h ${m} min`;
+  else if(m > 0) txt += `${m} min ${s} s`;
+  else           txt += `${s} s`;
+  el.textContent = txt;
+}
+
+function actualizarReloj(){
+  const d = new Date();
+  clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  dateEl.textContent = d.toLocaleDateString('es-ES', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+}
+
+/* =========================================================
+   5. DISPARO Y PARADA DE LA ALARMA
+   ========================================================= */
+function dispararAlarma(){
+  if(sonando) return;
+  sonando = true;
+
+  $('overlayTime').textContent = `${pad(alarma.h)}:${pad(alarma.m)}`;
+  overlay.classList.add('show');
+
+  startRinging(alarma.sonido, alarma.duracion);
+
+  if(navigator.vibrate){
+    try{ navigator.vibrate([500, 300, 500, 300, 500]); }catch(e){}
+  }
+
+  autoStopId = setTimeout(() => detenerAlarma(), alarma.duracion * 1000);
+}
+
+function detenerAlarma(){
+  clearTimeout(autoStopId);
+  autoStopId = null;
+  stopRinging(false);
+  sonando = false;
+  overlay.classList.remove('show');
+  alarma = null;
+  renderEstado();
+}
+
+/* =========================================================
+   6. BUCLE PRINCIPAL
+   ========================================================= */
+function tick(){
+  actualizarReloj();
+
+  if(alarma){
+    actualizarCuentaAtras();
+    if(!sonando && Date.now() >= alarma.target.getTime()){
+      dispararAlarma();
+    }
+  }
+}
+
+/* =========================================================
+   7. EVENTOS
+   ========================================================= */
+$('setBtn').addEventListener('click', () => {
+  const val = timeEl.value;
+  if(!val){
+    alert('Selecciona una hora para la alarma.');
+    return;
+  }
+  // Desbloquea el audio con el gesto del usuario
+  getCtx();
+
+  const [h, m] = val.split(':').map(Number);
+  alarma = {
+    h, m,
+    sonido: sound.value,
+    duracion: parseInt(duration.value, 10),
+    target: proximaOcurrencia(h, m)
+  };
+  renderEstado();
+});
+
+$('testBtn').addEventListener('click', () => {
+  getCtx();
+  previewSound();
+});
+
+$('stopBtn').addEventListener('click', detenerAlarma);
+
+duration.addEventListener('input', () => {
+  durLabel.textContent = duration.value + ' s';
+});
+
+volume.addEventListener('input', () => {
+  volLabel.textContent = volume.value + ' %';
+  if(ringState) ringState.master.gain.value = volumenActual();
+});
+
+// Reanudar el contexto si el navegador lo suspende
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
+});
+
+// Desbloqueo preventivo del audio al primer clic
+document.addEventListener('click', () => { getCtx(); }, { once: true });
+
+/* Arranque */
+actualizarReloj();
+renderEstado();
+setInterval(tick, 250);
+</script>
+</body>
+</html>
